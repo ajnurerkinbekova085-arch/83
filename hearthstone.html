@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Hearthstone Click</title>
+
+<style>
+body {
+    background: url("full-images/bg.jpg");
+    background-size: cover;
+    background-position: center;
+    color: white;
+    text-align: center;
+    font-family: Arial;
+}
+
+.row {
+    display: flex;
+    justify-content: center;
+    margin: 20px;
+}
+
+.card {
+    margin: 10px;
+    cursor: pointer;
+}
+
+.card_img {
+    width: 150px;
+    height: 220px;
+    background-size: cover;
+    background-position: center;
+    position: relative;
+    border: 3px solid white;
+    border-radius: 10px;
+}
+
+/* выбранная карта */
+.selected {
+    border: 3px solid yellow;
+}
+
+.property {
+    position: absolute;
+    bottom: 5px;
+    padding: 5px 10px;
+    border-radius: 50%;
+    font-weight: bold;
+}
+
+.hp {
+    background: red;
+    left: 10%;
+}
+
+.damage {
+    background: orange;
+    right: 10%;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Враг</h1>
+<div class="row enemy_row"></div>
+
+<h1>Игрок</h1>
+<div class="row player_row"></div>
+
+<script>
+
+function getRandom() {
+    return Math.floor(Math.random() * 11) + 1;
+}
+
+let images = [
+    "full-images/1.png",
+    "full-images/2.png",
+    "full-images/3.png",
+    "full-images/4.png",
+    "full-images/5.png",
+    "full-images/6.png",
+    "full-images/7.png",
+    "full-images/8.png",
+    "full-images/9.png"
+];
+
+function createCard() {
+    return {
+        hp: getRandom(),
+        damage: getRandom(),
+        image: images[Math.floor(Math.random() * images.length)]
+    };
+}
+
+let playerCards = [createCard(), createCard(), createCard()];
+let enemyCards = [createCard(), createCard(), createCard()];
+
+let selectedCard = null;
+
+// 🔥 рендер
+function renderCards() {
+    document.querySelector(".enemy_row").innerHTML = "";
+    document.querySelector(".player_row").innerHTML = "";
+
+    // враг
+    enemyCards.forEach((card, index) => {
+        let div = createCardElement(card);
+
+        div.onclick = () => {
+            if (selectedCard !== null) {
+                // атака
+                card.hp -= selectedCard.damage;
+
+                // если умер
+                if (card.hp <= 0) {
+                    enemyCards.splice(index, 1);
+                }
+
+                selectedCard = null;
+                renderCards();
+                checkWinner();
+            }
+        };
+
+        document.querySelector(".enemy_row").appendChild(div);
+    });
+
+    // игрок
+    playerCards.forEach((card, index) => {
+        let div = createCardElement(card);
+
+        div.onclick = () => {
+            selectedCard = card;
+            renderCards();
+
+            // подсветка
+            document.querySelectorAll(".player_row .card_img")[index].classList.add("selected");
+        };
+
+        document.querySelector(".player_row").appendChild(div);
+    });
+}
+
+// создание HTML карты
+function createCardElement(card) {
+    let cardDiv = document.createElement("div");
+    cardDiv.classList.add("card");
+
+    let img = document.createElement("div");
+    img.classList.add("card_img");
+    img.style.backgroundImage = "url('" + card.image + "')";
+
+    let hp = document.createElement("div");
+    hp.classList.add("property", "hp");
+    hp.innerHTML = card.hp;
+
+    let damage = document.createElement("div");
+    damage.classList.add("property", "damage");
+    damage.innerHTML = card.damage;
+
+    img.appendChild(hp);
+    img.appendChild(damage);
+    cardDiv.appendChild(img);
+
+    return cardDiv;
+}
+
+// проверка победы
+function checkWinner() {
+    if (enemyCards.length === 0) {
+        alert("Ты победил 🎉");
+    } else if (playerCards.length === 0) {
+        alert("Ты проиграл ");
+    }
+}
+
+// старт
+renderCards();
+
+</script>
+
+</body>
+</html>
